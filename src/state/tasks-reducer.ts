@@ -29,7 +29,7 @@ export const changeTaskStatusAC = (tdlId: string, taskId: string, isDone: boolea
 } as const)
 
 
-export const tasksReducer = (state: TaskStateType, action: ActionType): TaskStateType => {
+export const tasksReducer = (state: TaskStateType = {}, action: ActionType): TaskStateType => {
     switch (action.type) {
         case "UPDATE_TASK_TITLE": {
             return {

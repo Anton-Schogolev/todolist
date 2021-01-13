@@ -1,7 +1,6 @@
-import React, {useReducer} from 'react';
+import React from 'react';
 import './App.css';
 import {Todolist} from "./Todolist";
-import {v1} from "uuid";
 import {AddItemForm} from "./AddItemForm";
 import {AppBar, Button, Container, Grid, IconButton, Paper, Toolbar, Typography} from "@material-ui/core";
 import {Menu} from "@material-ui/icons";
@@ -9,10 +8,11 @@ import {
     addTodolistAC,
     changeFilterAC,
     deleteTodolistAC,
-    todolistsReducer,
     updateTodolistAC
 } from "./state/todolists-reducer";
-import {addTaskAC, changeTaskStatusAC, removeTaskAC, tasksReducer, updateTaskTitleAC} from "./state/tasks-reducer";
+import {addTaskAC, changeTaskStatusAC, removeTaskAC, updateTaskTitleAC} from "./state/tasks-reducer";
+import {useDispatch, useSelector} from "react-redux";
+import {AppRootStateType} from "./state/store";
 
 export type TaskType = {
     id: string
@@ -33,7 +33,7 @@ export type TaskStateType = {
 }
 
 function App() {
-    const todoListID1 = v1()
+    /*const todoListID1 = v1()
     const todoListID2 = v1()
 
     const [todoLists, dispatchTodoLists] = useReducer(todolistsReducer, [
@@ -48,18 +48,6 @@ function App() {
             filter: "all"
         }
     ])
-    /*const [tasks, setTasks] = useState<TaskStateType>({
-        [todoListID1]: [
-            {id: v1(), title: "HTML", isDone: true},
-            {id: v1(), title: "JS", isDone: true},
-            {id: v1(), title: "React", isDone: false},
-        ],
-        [todoListID2]: [
-            {id: v1(), title: "Meat", isDone: false},
-            {id: v1(), title: "Milk", isDone: false},
-            {id: v1(), title: "Cheese", isDone: false},
-        ]
-    })*/
     const [tasks, dispatchTasks] = useReducer(tasksReducer, {
         [todoListID1]: [
             {id: v1(), title: "HTML", isDone: true},
@@ -71,40 +59,39 @@ function App() {
             {id: v1(), title: "Milk", isDone: false},
             {id: v1(), title: "Cheese", isDone: false},
         ]
-    })
+    })*/
+    const todolists = useSelector<AppRootStateType, TodolistType[]>((state) => state.todolists)
+    const tasks = useSelector<AppRootStateType, TaskStateType>((state) => state.tasks)
+    const dispatch = useDispatch()
 
     const updateTaskTittle = (tittle: string, taskID: string, tdlId: string) => {
-        dispatchTasks(updateTaskTitleAC(tdlId, taskID, tittle))
+        dispatch(updateTaskTitleAC(tdlId, taskID, tittle))
     }
 
     function removeTask(taskID: string, tdlId: string) {
-        dispatchTasks(removeTaskAC(tdlId, taskID))
+        dispatch(removeTaskAC(tdlId, taskID))
     }
 
     const addTask = (title: string, tdlId: string) => {
-        dispatchTasks(addTaskAC(tdlId, title))
+        dispatch(addTaskAC(tdlId, title))
     }
 
     function changeStatus(taskID: string, isDone: boolean, tdlId: string) {
-        dispatchTasks(changeTaskStatusAC(tdlId, taskID, isDone))
+        dispatch(changeTaskStatusAC(tdlId, taskID, isDone))
     }
 
     function changeFilter(value: FilterValueType, tdlId: string) {
-        dispatchTodoLists(changeFilterAC(tdlId, value))
+        dispatch(changeFilterAC(tdlId, value))
     }
 
     const deleteTodolist = (id: string) => {
-        const action = deleteTodolistAC(id)
-        dispatchTodoLists(action)
-        dispatchTasks(action)
+        dispatch(deleteTodolistAC(id))
     }
     const addTodoList = (title: string) => {
-        const action = addTodolistAC(title)
-        dispatchTodoLists(action)
-        dispatchTasks(action)
+        dispatch(addTodolistAC(title))
     }
     const updateTodoListTitle = (title: string, tdlId: string) => {
-        dispatchTodoLists(updateTodolistAC(title, tdlId))
+        dispatch(updateTodolistAC(title, tdlId))
     }
 
     const todoListsMap = ((tdl: TodolistType) => {
@@ -116,7 +103,7 @@ function App() {
             tasksForTodolist = tasks[tdl.id].filter(t => t.isDone)
         }
         return (
-            <Grid item>
+            <Grid item key={tdl.id}>
                 <Paper style={{padding: "10px"}}>
                     <Todolist
                         key={tdl.id}
@@ -156,7 +143,7 @@ function App() {
                     <AddItemForm addItem={addTodoList}/>
                 </Grid>
                 <Grid container spacing={3}>
-                    {todoLists.map(todoListsMap)}
+                    {todolists.map(todoListsMap)}
                 </Grid>
             </Container>
         </div>
@@ -164,4 +151,5 @@ function App() {
 }
 
 export default App;
+
 
