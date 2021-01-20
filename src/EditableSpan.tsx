@@ -6,7 +6,7 @@ type PropsType = {
     save: (text: string) => void
 }
 
-export const EditableSpan = (props: PropsType) => {
+export const EditableSpan = React.memo((props: PropsType) => {
     const [editable, setEditable] = useState<boolean>(false)
     const [title, setTitle] = useState<string>(props.value)
     const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -36,4 +36,4 @@ export const EditableSpan = (props: PropsType) => {
                     : <span onDoubleClick={onEditable}>{props.value}</span>
             }</>
     )
-}
+})

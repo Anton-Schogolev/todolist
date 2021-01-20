@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useCallback} from "react";
 import {FilterValueType, TaskType} from "./App";
 import {AddItemForm} from "./AddItemForm";
 import {EditableSpan} from "./EditableSpan";
@@ -20,26 +20,55 @@ type PropsType = {
     updateTodoListTitle: (tittle: string, tdlId: string) => void
 }
 
-export function Todolist(props: PropsType) {
+type TaskProps = {
+    taskObj: TaskType,
+    changeStatus: () => void,
+    save: (title: string) => void,
+    removeTask: () => void
+};
 
-    const addTask = (title: string) => props.addTask(title, props.id)
+const Task = React.memo((props: TaskProps) => {
+    const {removeTask, save, changeStatus} = props
+    const onChange = useCallback(changeStatus,[changeStatus])
+    const saveHandler = useCallback(save,[save])
+    const removeTaskHandler = useCallback(removeTask,[removeTask])
+    return <li className={props.taskObj.isDone ? "isDone" : ""}>
+        <Checkbox color={"primary"} onChange={onChange} checked={props.taskObj.isDone}/>
+        <EditableSpan save={saveHandler} value={props.taskObj.title}/>
+        <IconButton onClick={removeTaskHandler}><Delete/></IconButton>
+    </li>;
+})
 
-    const allOnClick = () => {
-        props.changeFilter("all", props.id)
+export const Todolist = React.memo((props: PropsType) => {
+    const {addTask, id, changeFilter, deleteTodolist, updateTodoListTitle} = props
+    let tasks = props.tasks
+    if (props.filter === "active") {
+        tasks = tasks.filter(t => !t.isDone)
     }
-    const activeOnClick = () => {
-        props.changeFilter("active", props.id)
-    }
-    const completedOnClick = () => {
-        props.changeFilter("completed", props.id)
+    if (props.filter === "completed") {
+        tasks = tasks.filter(t => t.isDone)
     }
 
-    const deleteTodolistZhdun = () => {
-        props.deleteTodolist(props.id)
-    }
-    const updateTodolistTitle = (title: string) => {
-        props.updateTodoListTitle(title, props.id)
-    }
+    const addNewTask = useCallback((title: string) =>
+        addTask(title, id),
+        [id,addTask])
+
+    const allOnClick = useCallback(() => {
+        changeFilter("all", id)
+    },[id, changeFilter])
+    const activeOnClick = useCallback(() => {
+        changeFilter("active", id)
+    },[id, changeFilter])
+    const completedOnClick = useCallback(() => {
+        changeFilter("completed", id)
+    },[id, changeFilter])
+
+    const deleteTodolistZhdun = useCallback(() => {
+        deleteTodolist(id)
+    },[id, deleteTodolist])
+    const updateTodolistTitle = useCallback((title: string) => {
+        updateTodoListTitle(title, id)
+    },[id, updateTodoListTitle])
 
     const tasksMap = (taskObj: TaskType) => {
         const removeTask = () => {
@@ -52,20 +81,18 @@ export function Todolist(props: PropsType) {
             props.updateTaskTittle(title, taskObj.id, props.id)
         }
         return (
-            <li key={taskObj.id} className={taskObj.isDone ? "isDone" : ""}>
-                <Checkbox color={"primary"} onChange={changeStatus} checked={taskObj.isDone}/>
-                <EditableSpan save={saveUpdate} value={taskObj.title}/>
-                <IconButton onClick={removeTask}><Delete/></IconButton>
-            </li>
+            <Task key={taskObj.id}
+                  taskObj={taskObj} changeStatus={changeStatus}
+                  save={saveUpdate} removeTask={removeTask}/>
         )
     }
     return (<div>
         <h3><EditableSpan save={updateTodolistTitle} value={props.title}/>
             <IconButton aria-label={"delete"} onClick={deleteTodolistZhdun}><Delete/></IconButton>
         </h3>
-        <AddItemForm addItem={addTask}/>
+        <AddItemForm addItem={addNewTask}/>
         <ul style={{listStyleType: "none", padding: "0"}}>
-            {props.tasks?.map(tasksMap)}{/*When we just created new todolist there is no tasks to him. Thus we need props.tasks?*/}
+            {tasks?.map(tasksMap)}{/*When we just created new todolist there is no tasks to him. Thus we need props.tasks?*/}
         </ul>
         <ButtonGroup style={{display: "block", textAlign: "center"}} size={"small"} color={"primary"}>
             <Button variant={props.filter === "all" ? "contained" : "outlined"} onClick={allOnClick}>All</Button>
@@ -76,4 +103,4 @@ export function Todolist(props: PropsType) {
             </Button>
         </ButtonGroup>
     </div>)
-}
+})
