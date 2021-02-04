@@ -20,14 +20,14 @@ type PropsType = {
     updateTodoListTitle: (tittle: string, tdlId: string) => void
 }
 
-type TaskProps = {
+export type TaskProps = {
     taskObj: TaskType,
     changeStatus: () => void,
     save: (title: string) => void,
     removeTask: () => void
 };
 
-const Task = React.memo((props: TaskProps) => {
+export const Task = React.memo((props: TaskProps) => {
     const {removeTask, save, changeStatus} = props
     const onChange = useCallback(changeStatus,[changeStatus])
     const saveHandler = useCallback(save,[save])

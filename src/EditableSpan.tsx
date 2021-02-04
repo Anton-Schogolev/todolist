@@ -1,12 +1,12 @@
 import React, {useState, KeyboardEvent, ChangeEvent} from "react";
 import {TextField} from "@material-ui/core";
 
-type PropsType = {
+export type EditableSpanPropsType = {
     value: string
     save: (text: string) => void
 }
 
-export const EditableSpan = React.memo((props: PropsType) => {
+export const EditableSpan = React.memo((props: EditableSpanPropsType) => {
     const [editable, setEditable] = useState<boolean>(false)
     const [title, setTitle] = useState<string>(props.value)
     const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
